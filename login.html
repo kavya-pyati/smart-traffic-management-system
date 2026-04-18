@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card border-0 shadow-lg glass-card auth-card fade-in">
+        <div class="text-center mb-4">
+            <i class="fa-solid fa-traffic-light fa-2x text-primary mb-2"></i>
+            <h2 class="fw-bold">Welcome Back</h2>
+            <p class="text-muted">Login to your account</p>
+        </div>
+        
+        <form action="{{ url_for('login') }}" method="POST">
+            <div class="mb-3">
+                <label for="email" class="form-label fw-medium"><i class="fa-solid fa-envelope me-2 text-muted"></i>Email</label>
+                <input type="email" class="form-control" id="email" name="email" required placeholder="name@example.com">
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label fw-medium"><i class="fa-solid fa-lock me-2 text-muted"></i>Password</label>
+                <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+            </div>
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold">Sign In <i class="fa-solid fa-arrow-right ms-2"></i></button>
+            </div>
+        </form>
+        
+        <div class="text-center mt-4">
+            <p class="mb-0 text-muted">Don't have an account? <a href="{{ url_for('signup') }}" class="text-primary text-decoration-none fw-bold">Sign up</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

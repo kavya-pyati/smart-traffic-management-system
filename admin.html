@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #prediction-map {
+        height: 400px;
+        width: 100%;
+        border-radius: 16px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5 fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fa-solid fa-chart-pie me-2 text-primary"></i> Admin Dashboard</h2>
+        <span class="badge bg-dark rounded-pill py-2 px-3 fw-normal">System Overview</span>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-5 g-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 text-uppercase fw-bold small">Total Users</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ user_count }}</h3>
+                    </div>
+                    <i class="fa-solid fa-users stat-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card border-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 text-uppercase fw-bold small">Routes Computed</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ route_count }}</h3>
+                    </div>
+                    <i class="fa-solid fa-route stat-icon text-success"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 text-uppercase fw-bold small">Pending Approvals</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ pending_users|length }}</h3>
+                    </div>
+                    <i class="fa-solid fa-clock stat-icon text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Approvals List -->
+        <div class="col-lg-5">
+            <div class="glass-card p-4 h-100 border-0 shadow-sm">
+                <h5 class="fw-bold mb-4 border-bottom pb-2 d-flex align-items-center">
+                    <i class="fa-solid fa-user-shield me-2 text-danger"></i> Emergency Approvals
+                </h5>
+                {% if pending_users %}
+                    <div class="list-group list-group-flush">
+                        {% for user in pending_users %}
+                            <div class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{ user.name }}</h6>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('approve_user', user_id=user.id) }}" class="btn btn-sm btn-success rounded-circle me-1" title="Approve"><i class="fa-solid fa-check"></i></a>
+                                    <a href="{{ url_for('reject_user', user_id=user.id) }}" class="btn btn-sm btn-danger rounded-circle" title="Reject"><i class="fa-solid fa-xmark"></i></a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fa-solid fa-check-circle fa-3x mb-3 text-success opacity-50"></i>
+                        <p>No pending approvals. You're all caught up!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Traffic Prediction Map Section -->
+        <div class="col-lg-7">
+            <div class="glass-card p-4 h-100 border-0 shadow-sm bg-white">
+                <h5 class="fw-bold mb-3 border-bottom pb-2 d-flex align-items-center justify-content-between">
+                    <span><i class="fa-solid fa-map-location-dot me-2 text-primary"></i> Traffic Hotspot Prediction</span>
+                </h5>
+                <p class="small text-muted mb-3">Predict traffic density for the current focus area.</p>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <button class="btn btn-warning btn-sm w-100 fw-bold" onclick="showMapPrediction('weekday')">
+                            <i class="fa-solid fa-industry me-1"></i> Weekday (Industrial)
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-success btn-sm w-100 fw-bold" onclick="showMapPrediction('weekend')">
+                            <i class="fa-solid fa-tree me-1"></i> Weekend (Picnic Spots)
+                        </button>
+                    </div>
+                </div>
+                <div id="prediction-map" class="shadow-sm border rounded"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Routes Log -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="glass-card p-4 border-0 shadow-sm">
+                <h5 class="fw-bold mb-4 border-bottom pb-2 d-flex align-items-center">
+                    <i class="fa-solid fa-list me-2 text-secondary"></i> Recent System Usage
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User ID</th>
+                                <th>Source</th>
+                                <th>Destination</th>
+                                <th>Route Type</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for route in recent_routes %}
+                            <tr>
+                                <td>{{ route.user_id }}</td>
+                                <td><span class="text-truncate d-inline-block" style="max-width: 150px;">{{ route.source }}</span></td>
+                                <td><span class="text-truncate d-inline-block" style="max-width: 150px;">{{ route.destination }}</span></td>
+                                <td>
+                                    {% if route.route_type == 'priority' %}
+                                        <span class="badge bg-danger">Priority</span>
+                                    {% elif route.route_type == 'fastest' %}
+                                        <span class="badge bg-primary">Fastest</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ route.route_type|capitalize }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">{{ route.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">No recent routes recorded.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Chart.js for Admin Analytics -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- New Shared Prediction Logic -->
+<script src="{{ url_for('static', filename='js/prediction.js') }}?v=1.0"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}?v=3.0"></script>
+{% endblock %}

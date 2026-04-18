@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card border-0 shadow-lg glass-card auth-card fade-in">
+        <div class="text-center mb-4">
+            <i class="fa-solid fa-user-plus fa-2x text-primary mb-2"></i>
+            <h2 class="fw-bold">Create Account</h2>
+            <p class="text-muted">Join the smart traffic network</p>
+        </div>
+        
+        <form action="{{ url_for('signup') }}" method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label fw-medium"><i class="fa-solid fa-user me-2 text-muted"></i>Full Name</label>
+                <input type="text" class="form-control" id="name" name="name" required placeholder="John Doe">
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label fw-medium"><i class="fa-solid fa-envelope me-2 text-muted"></i>Email</label>
+                <input type="email" class="form-control" id="email" name="email" required placeholder="name@example.com">
+            </div>
+            <div class="mb-3">
+                <label for="role" class="form-label fw-medium"><i class="fa-solid fa-car me-2 text-muted"></i>Vehicle Type</label>
+                <select class="form-select" id="role" name="role" required>
+                    <option value="normal">Normal Vehicle (Commuter)</option>
+                    <option value="emergency">Emergency Vehicle (Ambulance/Fire/Police)</option>
+                </select>
+                <div class="form-text mt-2"><i class="fa-solid fa-circle-info text-info me-1"></i>Emergency vehicle accounts require admin approval before routing is enabled.</div>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label fw-medium"><i class="fa-solid fa-lock me-2 text-muted"></i>Password</label>
+                <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+            </div>
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold">Sign Up <i class="fa-solid fa-rocket ms-2"></i></button>
+            </div>
+        </form>
+        
+        <div class="text-center mt-4">
+            <p class="mb-0 text-muted">Already have an account? <a href="{{ url_for('login') }}" class="text-primary text-decoration-none fw-bold">Log in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
